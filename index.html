@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bill Calculator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Bill Calculator</h1>
+        <form id="billForm">
+            <div class="form-group">
+                <label for="numPeople">Number of People:</label>
+                <input type="number" id="numPeople" min="1" required>
+            </div>
+            <div class="form-group">
+                <label for="deliveryCharges">Delivery Charges (Rs):</label>
+                <input type="number" id="deliveryCharges" min="0" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="otherCharges">Other Common Charges (Rs):</label>
+                <input type="number" id="otherCharges" min="0" step="0.01" required>
+            </div>
+            <div id="peopleOrders" class="form-group"></div>
+            <div class="form-group">
+                <button type="button" onclick="addPerson()">Add Person</button>
+                <button type="button" onclick="calculateBill()">Calculate Bill</button>
+            </div>
+            <div class="form-group">
+                <input type="checkbox" id="includeGST" name="includeGST">
+                <label for="includeGST">Include 15% GST</label>
+            </div>
+        </form>
+        <div id="results"></div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
