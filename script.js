@@ -18,9 +18,7 @@ const predefinedNames = [
 let peopleCount = 0;
 
 function populateNamesDropdown() {
-    const peopleOrders = document.getElementById('peopleOrders');
     const dropdown = document.createElement('select');
-    dropdown.id = `person${peopleCount}`;
     dropdown.classList.add('person-dropdown');
     
     const defaultOption = document.createElement('option');
@@ -35,42 +33,40 @@ function populateNamesDropdown() {
         dropdown.appendChild(option);
     });
     
-    peopleOrders.appendChild(dropdown);
+    return dropdown;
 }
 
 function addPerson() {
-    const numPeople = parseInt(document.getElementById('numPeople').value);
     const peopleOrders = document.getElementById('peopleOrders');
     
-    if (peopleCount < numPeople) {
-        peopleCount++;
-        
-        const personDiv = document.createElement('div');
-        personDiv.classList.add('person');
-        
-        const dropdownLabel = document.createElement('label');
-        dropdownLabel.textContent = `Person ${peopleCount} Name:`;
-        dropdownLabel.htmlFor = `person${peopleCount}`;
-        
-        populateNamesDropdown();
-        
-        const orderLabel = document.createElement('label');
-        orderLabel.textContent = `Order Amount (Rs):`;
-        orderLabel.htmlFor = `order${peopleCount}`;
-        
-        const orderInput = document.createElement('input');
-        orderInput.type = 'number';
-        orderInput.id = `order${peopleCount}`;
-        orderInput.min = '0';
-        orderInput.step = '0.01';
-        orderInput.required = true;
-        
-        personDiv.appendChild(dropdownLabel);
-        personDiv.appendChild(document.getElementById(`person${peopleCount}`));
-        personDiv.appendChild(orderLabel);
-        personDiv.appendChild(orderInput);
-        peopleOrders.appendChild(personDiv);
-    }
+    peopleCount++;
+    
+    const personDiv = document.createElement('div');
+    personDiv.classList.add('person');
+    
+    const dropdownLabel = document.createElement('label');
+    dropdownLabel.textContent = `Person ${peopleCount} Name:`;
+    dropdownLabel.htmlFor = `person${peopleCount}`;
+    
+    const dropdown = populateNamesDropdown();
+    dropdown.id = `person${peopleCount}`;
+    
+    const orderLabel = document.createElement('label');
+    orderLabel.textContent = `Order Amount (Rs):`;
+    orderLabel.htmlFor = `order${peopleCount}`;
+    
+    const orderInput = document.createElement('input');
+    orderInput.type = 'number';
+    orderInput.id = `order${peopleCount}`;
+    orderInput.min = '0';
+    orderInput.step = '0.01';
+    orderInput.required = true;
+    
+    personDiv.appendChild(dropdownLabel);
+    personDiv.appendChild(dropdown);
+    personDiv.appendChild(orderLabel);
+    personDiv.appendChild(orderInput);
+    peopleOrders.appendChild(personDiv);
 }
 
 function clearValidationErrors() {
@@ -87,13 +83,6 @@ function validateInputs() {
 
     let isValid = true;
     
-    const numPeople = document.getElementById('numPeople');
-    if (!numPeople.value || parseInt(numPeople.value) <= 0) {
-        isValid = false;
-        numPeople.classList.add('invalid-input');
-        showValidationMessage(numPeople, 'Please enter a valid number of people.');
-    }
-    
     const deliveryCharges = document.getElementById('deliveryCharges');
     if (!deliveryCharges.value || parseFloat(deliveryCharges.value) < 0) {
         isValid = false;
@@ -108,6 +97,11 @@ function validateInputs() {
         showValidationMessage(otherCharges, 'Please enter valid other charges.');
     }
     
+    if (peopleCount === 0) {
+        isValid = false;
+        showValidationMessage(document.getElementById('peopleOrders'), 'Please add at least one person.');
+    }
+
     for (let i = 1; i <= peopleCount; i++) {
         const name = document.querySelector(`#person${i}`);
         const orderAmount = document.getElementById(`order${i}`);
@@ -144,22 +138,21 @@ function calculateBill() {
         return;
     }
 
-    const numPeople = parseInt(document.getElementById('numPeople').value);
     const deliveryCharges = parseFloat(document.getElementById('deliveryCharges').value);
     const otherCharges = parseFloat(document.getElementById('otherCharges').value);
-    const includeGST = document.getElementById('includeGST').checked;
+    const gstRate = parseFloat(document.getElementById('gstRate').value);
     
-    const commonCharges = (deliveryCharges + otherCharges) / numPeople;
+    const commonCharges = (deliveryCharges + otherCharges) / peopleCount;
     
     let totalBill = 0;
     const results = document.getElementById('results');
     results.innerHTML = '';
     
-    for (let i = 1; i <= numPeople; i++) {
+    for (let i = 1; i <= peopleCount; i++) {
         const name = document.querySelector(`#person${i}`).value;
         const orderAmount = parseFloat(document.getElementById(`order${i}`).value);
         
-        const gstAmount = includeGST ? orderAmount * 0.15 : 0;
+        const gstAmount = orderAmount * gstRate;
         const totalOrderAmount = orderAmount + gstAmount;
         const totalPersonBill = commonCharges + totalOrderAmount;
         
@@ -173,4 +166,22 @@ function calculateBill() {
     const totalResult = document.createElement('p');
     totalResult.textContent = `Total Bill for Everyone: Rs. ${totalBill.toFixed(2)}`;
     results.appendChild(totalResult);
+}
+
+function resetForm() {
+    // Clear people count and reset the people orders section
+    peopleCount = 0;
+    const peopleOrders = document.getElementById('peopleOrders');
+    peopleOrders.innerHTML = '';
+
+    // Clear other input fields
+    document.getElementById('deliveryCharges').value = '';
+    document.getElementById('otherCharges').value = '';
+    document.getElementById('gstRate').value = '0';
+
+    // Clear results
+    document.getElementById('results').innerHTML = '';
+
+    // Remove validation errors
+    clearValidationErrors();
 }
